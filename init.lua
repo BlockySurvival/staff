@@ -186,7 +186,8 @@ minetest.register_on_joinplayer(function(player)
    local fr = first_row(name_ps)
    if fr ~= nil then
       local rank = get_rank_by_uid(fr.rank_uid)
-      player:set_nametag_attributes({text = minetest.colorize("#00FF00", "[" .. rank .. "] ") .. pname})
+      local tag = minetest.colorize("#00FF00", "[" .. rank .. "] ") .. pname
+      more_monoids.player_tag_monoid:add_change(player, tag)
    end
    name_ps:reset()
 end)
