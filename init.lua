@@ -53,6 +53,10 @@ execute_sql("CREATE TABLE IF NOT EXISTS ranks(name VARCHAR(50), UNIQUE(name));" 
 "UNIQUE(name)" ..
 "FOREIGN KEY(rank_uid) REFERENCES ranks(rowid));")
 
+local function format_tag(pname, rank)
+   return minetest.colorize("#00FF00", "[" .. rank .. "] ") .. pname
+end
+
 
 -- Register chat commands
 ChatCmdBuilder.new("staff", function(cmd)
@@ -125,6 +129,8 @@ ChatCmdBuilder.new("staff", function(cmd)
       ps:bind_values(staff, ruid)
       local code = ps:step()
       if code == sqlite.DONE then
+         local tag = format_tag(staff, rank)
+         more_monoids.player_tag:add_change(player, tag, "staff")
          return true, "Added staff member '" .. staff .. "' with rank '" .. rank .. "'"
       elseif code == sqlite.CONSTRAINT then
          return false, "'" .. staff .. "' is already a staff member"
@@ -186,8 +192,14 @@ minetest.register_on_joinplayer(function(player)
    local fr = first_row(name_ps)
    if fr ~= nil then
       local rank = get_rank_by_uid(fr.rank_uid)
-      local tag = minetest.colorize("#00FF00", "[" .. rank .. "] ") .. pname
-      more_monoids.player_tag_monoid:add_change(player, tag)
+      local tag = format_tag(pname, rank)
+      more_monoids.player_tag:add_change(player, tag, "staff")
+   else
+      more_monoids.player_tag:add_change(player, pname, "staff")
    end
    name_ps:reset()
+end)
+
+minetest.register_on_leaveplayer(function(player)
+   more_monoids.player_tag:del_change(player, "staff")
 end)
