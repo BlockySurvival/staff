@@ -129,8 +129,11 @@ ChatCmdBuilder.new("staff", function(cmd)
       ps:bind_values(staff, ruid)
       local code = ps:step()
       if code == sqlite.DONE then
-         local tag = format_tag(staff, rank)
-         more_monoids.player_tag:add_change(player, tag, "staff")
+         local player = minetest.get_player_by_name(staff)
+         if player then
+            local tag = format_tag(staff, rank)
+            more_monoids.player_tag:add_change(player, tag, "staff")
+         end
          return true, "Added staff member '" .. staff .. "' with rank '" .. rank .. "'"
       elseif code == sqlite.CONSTRAINT then
          return false, "'" .. staff .. "' is already a staff member"
