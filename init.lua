@@ -10,8 +10,6 @@ if not ienv then
 end
 
 local sqlite = ienv.require("lsqlite3")
-sqlite3 = nil
-
 local db = sqlite.open(wp .. "/staff.sqlite")
 
 -- Close on shutdown
@@ -35,7 +33,7 @@ local function get_rank_by_uid(ruid)
    ps:bind_values(ruid)
    return first_row(ps).name
 end
-   
+
 local function execute_sql(sql, func)
    local code = db:exec(sql, func)
    if code ~= sqlite.OK then
@@ -74,7 +72,7 @@ ChatCmdBuilder.new("staff", function(cmd)
          return false, "SQLite error code " .. tostring(code) .. ": See server logs"
       end
    end)
-   
+
    cmd:sub("rename rank :old :new", function(name, old, new)
       local ps = db:prepare("UPDATE ranks SET name=:new WHERE name=:old")
       ps:bind_values(new, old)
@@ -92,7 +90,7 @@ ChatCmdBuilder.new("staff", function(cmd)
          return false, "SQLite error code " .. tostring(code) .. ": See server logs"
       end
    end)
-   
+
    cmd:sub("remove rank :rank", function(name, rank)
       local ps = db:prepare("DELETE FROM ranks WHERE name=:rank")
       ps:bind_values(rank)
@@ -101,14 +99,14 @@ ChatCmdBuilder.new("staff", function(cmd)
          if db:changes() == 0 then
             return false, "No such rank '" .. rank .. "'"
          else
-            return true, "Removed rank '" .. rank .. "'" 
+            return true, "Removed rank '" .. rank .. "'"
          end
       else
          log_error()
          return false, "SQLite error code " .. tostring(code) .. ": See server logs"
       end
    end)
-   
+
    cmd:sub("list ranks", function(name)
       local rtext = ""
       for rank in db:urows("SELECT name FROM ranks") do
@@ -116,7 +114,7 @@ ChatCmdBuilder.new("staff", function(cmd)
       end
       return true, rtext
    end)
-   
+
    cmd:sub("add staff :name :rank", function(name, staff, rank)
       local ps = db:prepare("SELECT rowid FROM ranks WHERE name=:rank")
       ps:bind_values(rank)
@@ -125,7 +123,7 @@ ChatCmdBuilder.new("staff", function(cmd)
          return false, "No such rank '" .. rank .. "'"
       end
       ruid = ruid.rowid
-      local ps = db:prepare("INSERT INTO staff(name, rank_uid) VALUES(:name, :ruid)")
+      ps = db:prepare("INSERT INTO staff(name, rank_uid) VALUES(:name, :ruid)")
       ps:bind_values(staff, ruid)
       local code = ps:step()
       if code == sqlite.DONE then
@@ -142,7 +140,7 @@ ChatCmdBuilder.new("staff", function(cmd)
          return false, "SQLite error code " .. tostring(code) .. ": See server logs"
       end
    end)
-   
+
    cmd:sub("remove staff :name", function(name, staff)
       local ps = db:prepare("DELETE FROM staff WHERE name=:name")
       ps:bind_values(staff)
@@ -158,7 +156,7 @@ ChatCmdBuilder.new("staff", function(cmd)
          return false, "SQLite error code " .. tostring(code) .. ": See server logs"
       end
    end)
-   
+
    cmd:sub("list staff", function(name)
       local stext = ""
       for sname, ruid in db:urows("SELECT name,rank_uid FROM staff") do
@@ -167,9 +165,9 @@ ChatCmdBuilder.new("staff", function(cmd)
       end
       return true, stext
    end)
-   
+
    cmd:sub("help", function (name)
-      return true, "Commands:\n" .. 
+      return true, "Commands:\n" ..
       "add rank <rank>\n" ..
       "rename rank <rank> <new name>\n" ..
       "remove rank <rank>\n" ..
@@ -178,7 +176,7 @@ ChatCmdBuilder.new("staff", function(cmd)
       "remove staff <name>\n" ..
       "list staff"
    end)
-   
+
 end, {
    description = "Modify staff ranks",
    privs = {
