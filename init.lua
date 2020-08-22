@@ -24,7 +24,7 @@ local function log_error()
 end
 
 local function first_row(ps)
-   for r in ps:nrows() do return r end
+   for r in ps:nrows() do return r end -- luacheck: ignore
    return nil
 end
 
